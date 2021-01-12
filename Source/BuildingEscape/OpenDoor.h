@@ -8,7 +8,7 @@
 #include "OpenDoor.generated.h"
 
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenEvent);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UOpenDoor : public UActorComponent
 {
@@ -22,29 +22,28 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	void OpenDoor();
-	void CloseDoor();
-
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private :
 	//See UPROPERTIES - MACRO - Un fel de [SeriazibleField] doar ca nu putem modifica - Propietatea devine vizibila in editor
-	UPROPERTY(VisibleAnywhere)
-	float OpenAngle = 90.0f;
 
 	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
+	ATriggerVolume* PressurePlate = nullptr;
+
+	AActor* Owner=nullptr;
 
 	UPROPERTY(EditAnywhere)
-	float DoorCloseDelay = 1.0f;
-
-	float LastDoorOpnTime;
-
-	AActor* Owner;
+	float TriggerMass = 30.f;
 
 	float GetTotalMassOfActorsOnPlate();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOpenEvent OnOpenRequest;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOpenEvent OnCloseRequest;
 
 		
 };

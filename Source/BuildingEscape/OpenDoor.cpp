@@ -20,6 +20,10 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner();
+	if (!PressurePlate)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No pressure plate assigned on %s ."), *GetOwner()->GetName());
+	}
 
 	//Find the owning AActor
 	//OpenDoor();
@@ -29,49 +33,25 @@ void UOpenDoor::BeginPlay()
 	
 }
 
-void UOpenDoor::OpenDoor()
-{
-	
-	//Create a rotator
-	//FRotator NewRotation = ;
-
-	//Set the door rotation
-	Owner->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
-
-	//FVector angle = Owner->GetTransform().GetRotation().Euler();
-	//FString angleText = angle.ToString();
-}
-
-void UOpenDoor::CloseDoor()
-{
-	//Create a rotator
-	//FRotator NewRotation = FRotator(0.0f, -80.0f, 0.0f);
-
-	//Set the door rotation
-	Owner->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
-
-	//FVector angle = Owner->GetTransform().GetRotation().Euler();
-	//FString angleText = angle.ToString();
-}
-
-
-
 
 // Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (GetTotalMassOfActorsOnPlate() > 50.0f)
+	if (GetTotalMassOfActorsOnPlate() > TriggerMass)
 	{
-		OpenDoor();
-		LastDoorOpnTime = GetWorld()->GetTimeSeconds();
+		UE_LOG(LogTemp, Warning, TEXT("MERGE"));
+		OnOpenRequest.Broadcast();
+	}
+	else
+	{
+		OnCloseRequest.Broadcast();
 	}
 	
-	if ((GetWorld()->GetTimeSeconds() - LastDoorOpnTime) > DoorCloseDelay)
-	{
-		CloseDoor();
-	}
+	
+	
+	
 	// ...
 }
 
@@ -80,8 +60,13 @@ float UOpenDoor::GetTotalMassOfActorsOnPlate()
 	float TotalMass = 0.0f;
 	TArray<AActor*> OverlapingActors;
 	//Find All Overlaping Actors
+	if (!PressurePlate)
+	{
+		return TotalMass;
+	}
 	PressurePlate->GetOverlappingActors(OUT OverlapingActors);
 
+	
 	//Iterate through them adding their masses
 	for (const auto& actor : OverlapingActors)
 	{
