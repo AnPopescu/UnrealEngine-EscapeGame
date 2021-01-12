@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include <PhysicsEngine\PhysicsHandleComponent.h>
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Grabber.generated.h"
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -26,6 +28,21 @@ public:
 
 private:
 	float Reach = 120.f;
+
+	UPhysicsHandleComponent* PhysicsHandle = nullptr;
+	UInputComponent* InputHandle = nullptr;
+	/// Raycast and grab what is in reach
+	void Grab();
+	void Release();
+
+	///Find attached PhusicsHnadleComponent
+	void FindPhysicsHandleComponent();
+
+	///Setup Input Component
+	void SetupInputComponent();
+
+	//Return Hit for first physics body in reach
+	const FHitResult GetFirstPhysicsBodyInReach();
 
 		
 };
